@@ -1,4 +1,5 @@
 import evaluate  # Metric computation library
+from textstat import flesch_reading_ease, flesch_kincaid_grade
 
 def calculate_bleu(original, simplified):
     """Calculate BLEU score."""
@@ -41,3 +42,12 @@ def calculate_meteor(original, simplified):
         references=[original]
     )
     return result["meteor"]
+
+def calculate_readability_scores(text):
+    """Calculate readability scores using Flesch-Kincaid metrics."""
+    flesch_score = flesch_reading_ease(text)
+    fk_grade = flesch_kincaid_grade(text)
+    return {
+        "flesch_reading_ease": flesch_score,
+        "flesch_kincaid_grade": fk_grade
+    }
