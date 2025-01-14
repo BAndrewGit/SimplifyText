@@ -1,6 +1,7 @@
 import numpy as np
 import nltk
 from nltk.corpus import wordnet
+import re
 
 nltk.download('wordnet', quiet=True)
 nltk.download('omw-1.4', quiet=True)
@@ -9,7 +10,6 @@ class FastTextPostProcessor:
     def __init__(self, preprocessor, frequency_threshold=20000):
         self.preprocessor = preprocessor
         self.frequency_threshold = frequency_threshold
-        self.banned_words = {"its", "is", "are", "be"}  # Add more words as needed
         self.fake_freq_dict = {
             'janjaweed': 1000,
             'holiest': 1000,
@@ -22,8 +22,10 @@ class FastTextPostProcessor:
         }
 
     def is_complex(self, word: str) -> bool:
+        if len(word) < 5:  # Skip words shorter than 5 characters
+            return False
         freq = self.fake_freq_dict.get(word.lower(), 5000)  # default frequency
-        return freq < self.frequency_threshold and word.lower() not in self.banned_words
+        return freq < self.frequency_threshold
 
     def get_synonyms(self, word: str) -> list:
         synonyms = set()
@@ -70,6 +72,11 @@ class FastTextPostProcessor:
         return best_syn
 
     def process_text(self, text: str) -> str:
+        # Remove explanations in parentheses and double quotes
+        text = re.sub(r'\([^)]*\)', '', text)  # Remove text within parentheses
+        text = re.sub(r'``', '', text)  # Remove opening double backticks
+        text = re.sub(r"''", '', text)  # Remove closing double backticks
+
         tokens = text.split()
         new_tokens = []
         for i, t in enumerate(tokens):
