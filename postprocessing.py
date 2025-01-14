@@ -22,12 +22,14 @@ class FastTextPostProcessor:
         }
 
     def is_complex(self, word: str) -> bool:
-        if len(word) < 5:  # Skip words shorter than 5 characters
+        """Check if a word is complex based on frequency and length."""
+        if len(word) < 4:  # Skip words shorter than 5 characters
             return False
-        freq = self.fake_freq_dict.get(word.lower(), 5000)  # default frequency
+        freq = self.fake_freq_dict.get(word.lower(), self.frequency_threshold // 2)
         return freq < self.frequency_threshold
 
     def get_synonyms(self, word: str) -> list:
+        """Retrieve synonyms for a given word using WordNet."""
         synonyms = set()
         for syn in wordnet.synsets(word):
             for lemma in syn.lemmas():
@@ -38,13 +40,15 @@ class FastTextPostProcessor:
         return list(synonyms)
 
     def is_valid_synonym(self, synonym: str, original: str) -> bool:
+        """Check if a synonym is valid."""
         if len(synonym) > len(original) * 1.2:  # Allow synonyms up to 20% longer
             return False
-        if not synonym.replace(" ", "").isalpha():  # Allow spaces in synonyms but no special chars
+        if not synonym.replace(" ", "").isalpha():  # Ensure the synonym is alphabetic
             return False
         return synonym.lower() != original.lower()
 
     def cosine_similarity(self, vec1, vec2):
+        """Compute cosine similarity between two vectors."""
         dot = np.dot(vec1, vec2)
         norm1 = np.linalg.norm(vec1)
         norm2 = np.linalg.norm(vec2)
@@ -53,6 +57,7 @@ class FastTextPostProcessor:
         return dot / (norm1 * norm2)
 
     def choose_best_synonym(self, original_word, synonyms):
+        """Choose the best synonym based on semantic similarity."""
         if not self.preprocessor.ft_model:
             return min(synonyms, key=len) if synonyms else original_word
 
@@ -72,7 +77,8 @@ class FastTextPostProcessor:
         return best_syn
 
     def process_text(self, text: str) -> str:
-        # Remove explanations in parentheses and double quotes
+        """Simplify text by replacing complex words with simpler synonyms."""
+        # Remove explanations in parentheses and specific quotes
         text = re.sub(r'\([^)]*\)', '', text)  # Remove text within parentheses
         text = re.sub(r'``', '', text)  # Remove opening double backticks
         text = re.sub(r"''", '', text)  # Remove closing double backticks
