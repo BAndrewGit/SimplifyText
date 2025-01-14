@@ -29,7 +29,7 @@ class FastTextPostProcessor:
         }
 
     def is_complex(self, word: str) -> bool:
-        if len(word) < 4:  # Skip words shorter than 4 characters
+        if len(word) < 4:
             return False
         freq = self.fake_freq_dict.get(word.lower(), self.frequency_threshold // 2)
         return freq < self.frequency_threshold
@@ -45,9 +45,9 @@ class FastTextPostProcessor:
         return list(synonyms)
 
     def is_valid_synonym(self, synonym: str, original: str) -> bool:
-        if len(synonym) > len(original) * 1.2:  # Allow synonyms up to 20% longer
+        if len(synonym) > len(original) * 1.2:
             return False
-        if not synonym.replace(" ", "").isalpha():  # Ensure the synonym is alphabetic
+        if not synonym.replace(" ", "").isalpha():
             return False
         return synonym.lower() != original.lower()
 
@@ -79,7 +79,6 @@ class FastTextPostProcessor:
         return best_syn
 
     def process_text(self, text: str) -> str:
-        # Remove explanations in parentheses and specific quotes
         text = re.sub(r'\([^)]*\)', '', text)  # Remove text within parentheses
         text = re.sub(r'``', '', text)  # Remove opening double backticks
         text = re.sub(r"''", '', text)  # Remove closing double backticks
@@ -93,13 +92,13 @@ class FastTextPostProcessor:
             if any(phrase in text.lower() for phrase in self.preserved_phrases):
                 skip_replacement = True
 
-            if t[0].isupper() and i > 0 and not skip_replacement:  # Preserve proper nouns
+            if t[0].isupper() and i > 0 and not skip_replacement:
                 new_tokens.append(t)
             elif t.isalpha() and self.is_complex(t):
                 syns = self.get_synonyms(t)
                 if syns:
                     best_syn = self.choose_best_synonym(t, syns)
-                    if i == 0:  # Capitalize the first word
+                    if i == 0:
                         best_syn = best_syn.capitalize()
                     new_tokens.append(best_syn)
                 else:
@@ -107,7 +106,6 @@ class FastTextPostProcessor:
             else:
                 new_tokens.append(t)
 
-        # Ensure the first letter of the entire text is capitalized
         if new_tokens:
             new_tokens[0] = new_tokens[0].capitalize()
 

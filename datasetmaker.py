@@ -6,9 +6,6 @@ from glob import glob
 from sklearn.model_selection import train_test_split
 
 def normalize_text(text):
-    """
-    Normalizează textul pentru a elimina caractere speciale neintenționate și codificările corupte.
-    """
     text = unicodedata.normalize("NFC", text)
 
     replacements = {
@@ -38,17 +35,11 @@ def normalize_text(text):
     return text
 
 def clean_text(text):
-    """
-    Curăță textul eliminând prefixele și normalizează spațiile.
-    """
     cleaned_text = re.sub(r"^[^\t]+\t\d+\s+", "", text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
     return cleaned_text
 
 def is_valid_pair(complex_text, simple_text):
-    """
-    Verifică dacă perechea complex_text și simple_text este validă.
-    """
     if (
         complex_text == simple_text or
         not simple_text.strip() or
@@ -59,9 +50,6 @@ def is_valid_pair(complex_text, simple_text):
     return True
 
 def process_asset_dataset(folder_path):
-    """
-    Procesează dataset-ul ASSET și returnează perechi (complex_text, simple_text).
-    """
     data = []
 
     orig_files = glob(os.path.join(folder_path, "asset.*.orig"))
@@ -93,9 +81,6 @@ def process_asset_dataset(folder_path):
     return data
 
 def process_wikisimple_dataset(normal_file, simple_file):
-    """
-    Procesează dataset-ul WikiSimple și returnează perechi (complex_text, simple_text).
-    """
     data = []
 
     with open(normal_file, "r", encoding="utf-8") as normal_f, open(simple_file, "r", encoding="utf-8") as simple_f:
@@ -120,9 +105,6 @@ def process_wikisimple_dataset(normal_file, simple_file):
     return data
 
 def split_and_save_data(data, train_output, dev_output, test_size=0.1):
-    """
-    Împarte datele în train și dev și salvează în fișiere JSON.
-    """
     train_data, dev_data = train_test_split(data, test_size=test_size, random_state=42)
 
     with open(train_output, "w", encoding="utf-8") as train_f:
@@ -134,9 +116,6 @@ def split_and_save_data(data, train_output, dev_output, test_size=0.1):
     print(f"Date de validare salvate în {dev_output} ({len(dev_data)} mostre).")
 
 def process_all_datasets():
-    """
-    Funcție principală care procesează toate dataset-urile și generează train.json + dev.json.
-    """
     asset_folder = "./raw/asset"
     wikisimple_doc_normal = "./raw/wikisimple/document-aligned/normal.txt"
     wikisimple_doc_simple = "./raw/wikisimple/document-aligned/simple.txt"

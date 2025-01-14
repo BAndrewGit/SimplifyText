@@ -13,20 +13,18 @@ from evaluate_local import (
 )
 
 def load_dev_data(dev_path="dev.json"):
-    """Load original text from dev.json."""
     with open(dev_path, "r", encoding="utf-8") as file:
         dev_data = json.load(file)
     return [entry["complex_text"] for entry in dev_data]  # Return original texts
 
 def format_text(text, width=80):
-    """Format text for better readability."""
     return textwrap.fill(text, width=width)
 
 def main():
-    preprocessor = TextPreprocessor(fasttext_model_path="cc.en.300.bin")  # Initialize preprocessor
+    preprocessor = TextPreprocessor(fasttext_model_path="cc.en.300.bin")
 
-    pipeline = TextSimplificationPipeline(  # Initialize pipeline
-        model_path="t5_simplification_model",  # Folder with fine-tuned T5 model
+    pipeline = TextSimplificationPipeline(
+        model_path="t5_simplification_model",
         preprocessor=preprocessor,
         freq_threshold=20000
     )

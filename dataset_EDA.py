@@ -6,16 +6,10 @@ import seaborn as sns
 import string
 
 def load_dataset(file_path):
-    """
-    Load dataset from a JSON file.
-    """
     with open(file_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 def text_length_statistics(data):
-    """
-    Compute and display text length statistics for complex and simplified texts.
-    """
     complex_lengths = [len(entry["complex_text"].split()) for entry in data]
     simple_lengths = [len(entry["simple_text"].split()) for entry in data]
 
@@ -28,9 +22,6 @@ def text_length_statistics(data):
     return complex_lengths, simple_lengths
 
 def plot_text_length_distribution(complex_lengths, simple_lengths):
-    """
-    Plot histogram of text lengths for complex and simplified texts.
-    """
     plt.figure(figsize=(12, 6))
     sns.histplot(complex_lengths, label="Complex Texts", color="blue", kde=True, stat="density", bins=30)
     sns.histplot(simple_lengths, label="Simplified Texts", color="green", kde=True, stat="density", bins=30)
@@ -41,9 +32,6 @@ def plot_text_length_distribution(complex_lengths, simple_lengths):
     plt.show()
 
 def vocabulary_analysis(data):
-    """
-    Analyze the vocabulary of the dataset, excluding punctuation and normalizing case.
-    """
     punctuation = set(string.punctuation)  # Set de caractere de punctuație
     complex_vocab = Counter(
         word.lower() for entry in data
@@ -60,7 +48,6 @@ def vocabulary_analysis(data):
     print(f"Unique Words in Complex Texts: {len(complex_vocab)}")
     print(f"Unique Words in Simplified Texts: {len(simple_vocab)}")
 
-    # Most common words
     print("\nMost Common Words in Complex Texts:")
     print(complex_vocab.most_common(10))
     print("\nMost Common Words in Simplified Texts:")
@@ -69,9 +56,6 @@ def vocabulary_analysis(data):
     return complex_vocab, simple_vocab
 
 def plot_word_frequency(vocab, title):
-    """
-    Plot the frequency of the most common words.
-    """
     most_common = vocab.most_common(10)
     words, counts = zip(*most_common)
 

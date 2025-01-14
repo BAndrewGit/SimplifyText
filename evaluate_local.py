@@ -1,4 +1,4 @@
-import evaluate  # Metric computation library
+import evaluate
 from textstat import flesch_reading_ease, flesch_kincaid_grade
 
 def calculate_bleu(original, simplified):
