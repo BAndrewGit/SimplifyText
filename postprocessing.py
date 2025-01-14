@@ -20,16 +20,21 @@ class FastTextPostProcessor:
             'methane': 5000,
             'conflicts': 40000,
         }
+        self.preserved_phrases = {
+            'artificial intelligence',
+            'renewable energy',
+            'natural language processing',
+            'image recognition',
+            'strategic planning'
+        }
 
     def is_complex(self, word: str) -> bool:
-        """Check if a word is complex based on frequency and length."""
-        if len(word) < 4:  # Skip words shorter than 5 characters
+        if len(word) < 4:  # Skip words shorter than 4 characters
             return False
         freq = self.fake_freq_dict.get(word.lower(), self.frequency_threshold // 2)
         return freq < self.frequency_threshold
 
     def get_synonyms(self, word: str) -> list:
-        """Retrieve synonyms for a given word using WordNet."""
         synonyms = set()
         for syn in wordnet.synsets(word):
             for lemma in syn.lemmas():
@@ -40,7 +45,6 @@ class FastTextPostProcessor:
         return list(synonyms)
 
     def is_valid_synonym(self, synonym: str, original: str) -> bool:
-        """Check if a synonym is valid."""
         if len(synonym) > len(original) * 1.2:  # Allow synonyms up to 20% longer
             return False
         if not synonym.replace(" ", "").isalpha():  # Ensure the synonym is alphabetic
@@ -48,7 +52,6 @@ class FastTextPostProcessor:
         return synonym.lower() != original.lower()
 
     def cosine_similarity(self, vec1, vec2):
-        """Compute cosine similarity between two vectors."""
         dot = np.dot(vec1, vec2)
         norm1 = np.linalg.norm(vec1)
         norm2 = np.linalg.norm(vec2)
@@ -57,7 +60,6 @@ class FastTextPostProcessor:
         return dot / (norm1 * norm2)
 
     def choose_best_synonym(self, original_word, synonyms):
-        """Choose the best synonym based on semantic similarity."""
         if not self.preprocessor.ft_model:
             return min(synonyms, key=len) if synonyms else original_word
 
@@ -77,7 +79,6 @@ class FastTextPostProcessor:
         return best_syn
 
     def process_text(self, text: str) -> str:
-        """Simplify text by replacing complex words with simpler synonyms."""
         # Remove explanations in parentheses and specific quotes
         text = re.sub(r'\([^)]*\)', '', text)  # Remove text within parentheses
         text = re.sub(r'``', '', text)  # Remove opening double backticks
@@ -85,8 +86,14 @@ class FastTextPostProcessor:
 
         tokens = text.split()
         new_tokens = []
+        skip_replacement = False
+
         for i, t in enumerate(tokens):
-            if t[0].isupper() and i > 0:  # Preserve proper nouns (excluding the first word)
+            # Preserve phrases
+            if any(phrase in text.lower() for phrase in self.preserved_phrases):
+                skip_replacement = True
+
+            if t[0].isupper() and i > 0 and not skip_replacement:  # Preserve proper nouns
                 new_tokens.append(t)
             elif t.isalpha() and self.is_complex(t):
                 syns = self.get_synonyms(t)
