@@ -49,7 +49,12 @@ def is_valid_pair(complex_text, simple_text):
     """
     Verifică dacă perechea complex_text și simple_text este validă.
     """
-    if complex_text == simple_text or not simple_text.strip() or len(simple_text.split()) < 3:
+    if (
+        complex_text == simple_text or
+        not simple_text.strip() or
+        len(complex_text.split()) < 4 or
+        len(simple_text.split()) < 4
+    ):
         return False
     return True
 
